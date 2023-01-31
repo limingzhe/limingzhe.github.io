@@ -99,7 +99,9 @@
     </h1>
     <div class="nested-links f5 lh-copy nested-copy-line-height">
       Introduction This is bold text, and this is emphasized text.
-Visit the Hugo website!
+Visit the Hugo website! 测试中文
+中文测试 $(document).ready(function () { alert(&#39;RUNOOB&#39;); }); int sumer = 12; if (sumer &gt; 9) { System.out.println(&#34;should discuss&#34;); } 1 Flink有状态计算介绍 1.1 基本概念 分布式系统最难的两个问题：1、保证消息的顺序处理2、精准一次（Exactly once）。本次分享Flink对这两个问题的解法。 下面是分布式系统里面的术语： 端到端一致性：一致性就是业务正确性，在流计算中，端到端的一致性代表Exactly once msg processing，一个消息只被处理一次，造成一次效果。注意，这里的“一次”是指逻辑上的效果，在物理上，消息可能因为机器故障被处理多次。 容错：容错在端到端一致性的语义下，是指在机器挂了、网络链接断开等情况下，系统的运算结果和没有任何failure发生时是一模一样的。 幂等：一个相同的操作, 无论重复多少次, 造成的效果都和只操作一次相等。 精确一次：一个消息只被处理一次，造成一次效果； 最多一次：一个消息最多被处理一次； 最少一次：一个消息最少被处理一次。 Flink是一个通用的流计算引擎，官方定义是Stateful Computations over Data Streams，数据流上的有状态计算。 Flink通过有状态计算提供了精确一次语义，支持端到端一致性，这是Flink相对于Spark Streaming、Storm等其他流计算引擎的最大优势。 下面是Flink的术语： Input、Output：上下游数据源，可以是Kafka、Hive&hellip;等数据库 Task：算子的一个并发，也被称为Slot，一个Task对应一个Java逻辑运算线程。 State：状态，可以理解为一个数据结构，存于Task所在机器的的内存或硬盘。 Snapshot：某个逻辑时钟所有Task的全局快照，也被称为Checkpoint。 上图是Flink的有状态计算架构图，Flink引擎从Input拿到数据，做逻辑计算，将计算之后的数据存入Output。Flink算子使用Input的数据 更新本地内存或硬盘的State。Flink引擎周期异步地收集每个算子的State，制作Snapshot，存入远程数据库。一旦Flink作业重启，每个算子可以从远程数据库恢复State。
+1.2 例子 下面通过一个例子解释上面提到的概念。场景：消费订单实时流，统计每个门店 每小时 订单数量与总和，每小时结束时输出统计数据。 代码块 Java
     </div>
   </div>
 </div>
