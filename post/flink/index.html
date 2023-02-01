@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Flink有状态 - 观天茶舍</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="olOwOlo" /><meta name="description" content="1 Flink有状态计算介绍 1.1 基本概念 分布式系统最难的两个问题：1、保证消息的顺序处理2、精准一次（Exactly once）。本次分享Flin" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.110.0 with theme even" />
+
+
+<link rel="canonical" href="http://localhost:1313/post/flink/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.f92fd13721ddf72129410fd8250e73152cc6f2438082b6c0208dc24ee7c13fc4.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="Flink有状态" />
+<meta property="og:description" content="1 Flink有状态计算介绍 1.1 基本概念 分布式系统最难的两个问题：1、保证消息的顺序处理2、精准一次（Exactly once）。本次分享Flin" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://localhost:1313/post/flink/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-01-30T20:40:54+08:00" />
+<meta property="article:modified_time" content="2023-01-30T20:40:54+08:00" />
+<meta itemprop="name" content="Flink有状态">
+<meta itemprop="description" content="1 Flink有状态计算介绍 1.1 基本概念 分布式系统最难的两个问题：1、保证消息的顺序处理2、精准一次（Exactly once）。本次分享Flin"><meta itemprop="datePublished" content="2023-01-30T20:40:54+08:00" />
+<meta itemprop="dateModified" content="2023-01-30T20:40:54+08:00" />
+<meta itemprop="wordCount" content="8040">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Flink有状态"/>
+<meta name="twitter:description" content="1 Flink有状态计算介绍 1.1 基本概念 分布式系统最难的两个问题：1、保证消息的顺序处理2、精准一次（Exactly once）。本次分享Flin"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">观天茶舍</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">观天茶舍</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Flink有状态</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2023-01-30 </span>
+        
+          <span class="more-meta"> 约 8040 字 </span>
+          <span class="more-meta"> 预计阅读 17 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-flink有状态计算介绍">1 Flink有状态计算介绍</a>
+      <ul>
+        <li><a href="#11-基本概念">1.1 基本概念</a></li>
+        <li><a href="#12-例子">1.2 例子</a></li>
+      </ul>
+    </li>
+    <li><a href="#2-chandy-lamport算法">2 Chandy-Lamport算法</a>
+      <ul>
+        <li><a href="#21-分布式模型">2.1 分布式模型</a></li>
+        <li><a href="#22-chandy-lamport算法步骤">2.2 Chandy-Lamport算法步骤</a></li>
+        <li><a href="#23-例子">2.3 例子</a></li>
+        <li><a href="#24-总结">2.4 总结</a></li>
+      </ul>
+    </li>
+    <li><a href="#3-flink-checkpoint">3 Flink Checkpoint</a>
+      <ul>
+        <li><a href="#31-算法改进">3.1 算法改进</a></li>
+        <li><a href="#32-制作checkpoint例子">3.2 制作Checkpoint例子</a></li>
+        <li><a href="#33-barrier对齐例子">3.3 Barrier对齐例子</a></li>
+        <li><a href="#34-state存储对象">3.4 state存储对象</a></li>
+        <li><a href="#35-state存储地点">3.5 state存储地点</a></li>
+        <li><a href="#36-state存储过程">3.6 state存储过程</a></li>
+        <li><a href="#37-state恢复">3.7 state恢复</a></li>
+      </ul>
+    </li>
+    <li><a href="#4-端到端一致性">4 端到端一致性</a>
+      <ul>
+        <li><a href="#41-要求">4.1 要求</a></li>
+        <li><a href="#42-source">4.2 Source</a></li>
+        <li><a href="#43-sink">4.3 Sink</a></li>
+      </ul>
+    </li>
+    <li><a href="#5-前沿技术">5 前沿技术</a>
+      <ul>
+        <li><a href="#51-unaligned-checkpoint">5.1 Unaligned Checkpoint</a></li>
+        <li><a href="#52-chi">5.2 Chi</a></li>
+      </ul>
+    </li>
+    <li><a href="#参考资料">参考资料</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-flink有状态计算介绍">1 Flink有状态计算介绍</h1>
+<h2 id="11-基本概念">1.1 基本概念</h2>
+<p>分布式系统最难的两个问题：1、保证消息的顺序处理2、精准一次（Exactly once）。本次分享Flink对这两个问题的解法。
+下面是分布式系统里面的术语：
+端到端一致性：一致性就是业务正确性，在流计算中，端到端的一致性代表Exactly once msg processing，一个消息只被处理一次，造成一次效果。注意，这里的“一次”是指逻辑上的效果，在物理上，消息可能因为机器故障被处理多次。
+容错：容错在端到端一致性的语义下，是指在机器挂了、网络链接断开等情况下，系统的运算结果和没有任何failure发生时是一模一样的。
+幂等：一个相同的操作, 无论重复多少次, 造成的效果都和只操作一次相等。
+精确一次：一个消息只被处理一次，造成一次效果；
+最多一次：一个消息最多被处理一次；
+最少一次：一个消息最少被处理一次。
+Flink是一个通用的流计算引擎，官方定义是<strong>Stateful Computations over Data Streams</strong>，数据流上的有状态计算。
+Flink通过有状态计算提供了精确一次语义，支持端到端一致性，这是Flink相对于Spark Streaming、Storm等其他流计算引擎的最大优势。
+<img src="https://cdn.nlark.com/yuque/0/2022/png/509706/1655024111084-aa8e856d-d744-4324-b78c-36514bfd00d9.png#clientId=ud2513e7f-3cbe-4&amp;crop=0&amp;crop=0&amp;crop=1&amp;crop=1&amp;from=paste&amp;height=230&amp;id=u916c4b33&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=460&amp;originWidth=1920&amp;originalType=binary&amp;ratio=1&amp;rotation=0&amp;showTitle=false&amp;size=228186&amp;status=done&amp;style=none&amp;taskId=u4c708809-31a7-46df-8225-de1455c4928&amp;title=&amp;width=960" alt="image.png">
+下面是Flink的术语：
+Input、Output：上下游数据源，可以是Kafka、Hive&hellip;等数据库
+Task：算子的一个并发，也被称为Slot，一个Task对应一个Java逻辑运算线程。
+State：状态，可以理解为一个数据结构，存于Task所在机器的的内存或硬盘。
+Snapshot：某个逻辑时钟所有Task的全局快照，也被称为Checkpoint。
+上图是Flink的有状态计算架构图，Flink引擎从Input拿到数据，做逻辑计算，将计算之后的数据存入Output。Flink算子使用Input的数据 更新本地内存或硬盘的State。Flink引擎周期异步地收集每个算子的State，制作Snapshot，存入远程数据库。一旦Flink作业重启，每个算子可以从远程数据库恢复State。</p>
+<h2 id="12-例子">1.2 例子</h2>
+<p>下面通过一个例子解释上面提到的概念。场景：消费订单实时流，统计每个门店 每小时 订单数量与总和，每小时结束时输出统计数据。
+<strong>代码块</strong>
+Java</p>
+<p>订单流Kafka数据：
+{&ldquo;poiId&rdquo;:123, &ldquo;orderAmount&rdquo;:10, &ldquo;timestamp&rdquo;:1624713847}
+{&ldquo;poiId&rdquo;:456, &ldquo;orderAmount&rdquo;:20, &ldquo;timestamp&rdquo;:1624713848}
+{&ldquo;poiId&rdquo;:123, &ldquo;orderAmount&rdquo;:30, &ldquo;timestamp&rdquo;:1624713849}
+&hellip;</p>
+<p>Flink 代码：
+DataStream<String> lines = env.addSource(<strong>new</strong> FlinkKafkaConsumer&lt;&gt;(&hellip;));
+DataStream<Order> orders = lines.map((line) -&gt; parse(line));
+DataStream<Statistics> stats = orders
+.keyBy(order -&gt; order.poiId)
+.timeWindow(Time.hours(1))
+.apply(<strong>new</strong> MyWindowAggregationFunction());
+poiSum.addSink(<strong>new</strong> MySink(&hellip;));
+Flink首先将代码编译成逻辑图，有四个算子：Source、map、keyby/window/apply、Sink。
+Flink进一步将逻辑图翻译成执行图，设置算子的并发，分配每个并发的机器。
+最后，算子在具体的机器上开始执行。其中，Source算子和keyby/window/apply是有状态的。Source算子记录了Kafka Topic的Offset，keyby/window/apply记录了时间窗口内的统计信息。
+<img src="https://cdn.nlark.com/yuque/0/2022/png/509706/1655024149535-4a30275b-f22a-418b-be84-e14586198976.png#clientId=ud2513e7f-3cbe-4&amp;crop=0&amp;crop=0&amp;crop=1&amp;crop=1&amp;from=paste&amp;height=518&amp;id=u70050e2a&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=1036&amp;originWidth=1596&amp;originalType=binary&amp;ratio=1&amp;rotation=0&amp;showTitle=false&amp;size=171352&amp;status=done&amp;style=none&amp;taskId=ufa8b2759-583d-4271-a065-cda8b678c53&amp;title=&amp;width=798" alt="image.png">
+Flink周期性地制作快照。假设，消费完第一条消息后，Flink制作快照成功。消费完第二条消息后机器故障，在精确一次的语义下，Flink的source算子和keyby/window/apply算子从上一次的快照中恢复State。Source算子从Snapshot记录的Kafka Offset消费，消费第二条消息。</p>
+<h1 id="2-chandy-lamport算法">2 Chandy-Lamport算法</h1>
+<p>Flink的有状态计算是基于Chandy-Lamport算法实现的。Chandy-Lamport算法于1985年被提出，解决分布式计算模型 制作异步、全局Snapshot问题。</p>
+<h2 id="21-分布式模型">2.1 分布式模型</h2>
+<p>论文提出的分布式模型：进程Process处理数据，Process之间通过Channel通信。Process对每个Channel都有一个Buffer，可以暂时存储其他Process发来的消息。每个Process都有State。
+例如下面这幅图，P1、P2两个Process，通过C12和C21通信，P1、P2的State都有X、Y、Z变量。</p>
+<p>Chandy-Lamport算法的目标是制作全局快照。全局快照由每个Process的局部快照和所有的Channel组成。局部快照包含两部分：自身的State和Buffer里的Message。
+下面四幅图都是全局快照。图1是初始状态，Channel中没有数据；图2，P1向P2发送将X2置为4的消息；图3，P2将X2=4的消息缓存在Buffer里；图4，P2处理该消息，修改State里的X。每幅图的快照都由P1、P2、C12、C21、P1和P2的Buffer 六部分组成。</p>
+<p>制作全局快照有两种解法：同步和异步。
+同步是指 定下一个时间点，时间点到，所有Process不处理数据，制作快照，快照制作完成恢复数据处理。它的缺点是很难保证所有机器的时钟一致，另外会造成全局阻塞，影响性能。
+异步是指 在Message里面插入Marker，构造逻辑时钟。每个Process在接收到Marker时制作快照，不同的Process不在一个时间点制作快照，避免了全局阻塞。Chandy-Lamport算法使用的是异步解法。</p>
+<h2 id="22-chandy-lamport算法步骤">2.2 Chandy-Lamport算法步骤</h2>
+<p>Chandy-Lamport算法有三个假设：1.网络可靠；2.Buffer是先进先出的无限大容量队列；3.Message有序、不重复。
+Chandy-Lamport算法的具体步骤：
+1、开始制作Snapshot
+Chandy-Lamport算法规定任意Process都可以作为Snapshot的发起者。发起者首先记录自身的State，然后把Marker发送给其他所有Process，开始记录所有Input Channel来的Message。
+下图中，P0发起Snapshot，将Marker信息发给P1、P2、P3，然后P0开始记录从P1、P2、P3来的所有消息，这些消息和P0的State共同组成P0的Snapshot。</p>
+<p>2、广播Marker
+对于还没有开始制作Snapshot的Process，如果第一次收到Marker，开始做Snapshot。具体步骤为：先记录State，然后把Marker发送给所有Process，开始记录还没有收到Marker的Process传来的Message。
+下图中，P1最开始收到P0的Marker，P1开始做Snapshot。此时，P2、P3的Marker还没到，所以P1会记录P2、P3传来的Message直到收到P2、P3的Marker。图中，P2、P3传来的4条Message会和P1的State一同组成P1的Snapshot。</p>
+<ol start="3">
+<li>完成Snapshot
+Process收到所有其他Process的Marker后，该Process的Snapshot制作完成。Central Server收集所有Process的Snapshot，持久化存储。一次快照就制作完成了。</li>
+</ol>
+<h2 id="23-例子">2.3 例子</h2>
+<p>下面举一个具体的例子。有P1、P2两个Process，初始状态中，信道没有消息。</p>
+<p>P1开始制作Snapshot，首先记录自己的State。蓝色表示组成Snapshot。</p>
+<p>然后通过C12向P2发送Marker，同时开始记录C21来的Message。与此同时，P2通过C21向P1发送消息M1。</p>
+<p>P2收到Marker，记录State，向P1发送marker。</p>
+<p>P1记录M1后，收到Marker。此时，P1、P2都收到marker，Snapshot完成。本次Snapshot由P1、P2的State和M1组成。</p>
+<h2 id="24-总结">2.4 总结</h2>
+<p>Chandy-Lamport算法通过Marker的流转，构建了 每个Process第一次收到Marker的逻辑时钟，记录了该逻辑时钟的状态。Process的局部快照由State + Input Buffer Message组成，消息的有序性由单线程+可靠网络+原子操作保障。</p>
+<h1 id="3-flink-checkpoint">3 Flink Checkpoint</h1>
+<h2 id="31-算法改进">3.1 算法改进</h2>
+<p>Flink基于Chandy-Lamport算法，实现了端到端一致性和容错。Flink做了轻量级的实现，每个算子在做Checkpoint时，不再记录上游各个算子的消息，而是阻塞上游数据。</p>
+<table>
+<thead>
+<tr>
+<th>Chandy-Lamport算法术语</th>
+<th>Flink术语</th>
+<th>语义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Snapshot</td>
+<td>Checkpoint</td>
+<td>快照</td>
+</tr>
+<tr>
+<td>Marker</td>
+<td>Barrier</td>
+<td>开始做快照的标记信息</td>
+</tr>
+<tr>
+<td>Process</td>
+<td>Task</td>
+<td>算子的单个并发，保证信息被顺序处理</td>
+</tr>
+<tr>
+<td>Channel</td>
+<td>TCP Channel</td>
+<td>可靠信道，保证信息的有序和不重复</td>
+</tr>
+<tr>
+<td>Buffer</td>
+<td>Buffer</td>
+<td>先进先出的队列，Flink反压机制使Buffer不会无限增长</td>
+</tr>
+</tbody>
+</table>
+<p>Flink作业是一个有向无环图，因此Checkpoint的发起者是JobManager（也称为Master），第一个做Checkpoint的是Source算子。
+具体步骤是：JobManager周期性向Source算子发Barrier，Source算子收到Barrier后，记录State，然后向下广播Barrier。下游算子收到第一个Barrier后，阻塞Input Channel，不再处理收到Barrier的上游的消息。下游算子收到所有上游的Barrier后，记录State，广播Barrier到下一个算子。所有算子制作完成后，JobManager收集Checkpoint信息。</p>
+<h2 id="32-制作checkpoint例子">3.2 制作Checkpoint例子</h2>
+<p>下面看一个完整制作Checkpoint例子。Master向所有Source算子发制作Checkpoint的命令，同时Master内部生成一张包含所有算子Checkpoint信息的表。四个Source算子接收到命令后，把当前消费的数据源位置汇报给Master，Source1是6791&hellip;，然后向下游算子广播Barrier。下游算子收到第一个Barrier时，阻塞该上游的数据，等待另一个上游的Barrier。另一个上游的Barrier也来了之后，制作Checkpoint，把本地的State存到远程的State Backend，然后把State Backend的指针汇报给Master，最后向Sink算子发送Barrier。Sink算子同样在收到所有Barrier后，向Master汇报ack。Master填满Checkpoint信息表后，本次Checkpoint制作完成。</p>
+<h2 id="33-barrier对齐例子">3.3 Barrier对齐例子</h2>
+<p>下面具体看下Barrier对齐的过程。图中的算子有两个上游，称为数字流和字母流。数字流的Barrier先到，算子就先阻塞数字流。字母流的Barrier也到了之后，算子将当前的State保存到State Backend，完成Checkpoint。</p>
+<h2 id="34-state存储对象">3.4 state存储对象</h2>
+<p>接下来我们看下Flink Checkpoint的具体工程实现。首先确定State的数据结构。
+Flink提供了Operator State和Keyed State供开发者使用。所有算子都可以实现Operator State，来管理State，每个Slot共享一个State。Operator State都存放在内存中，不能超过Slot的内存。只有KeyBy之后的算子可以使用Keyed State，每个Key对应一个状态，开发者可以选择Flink内嵌的RocksDB作为State存储，RocksDB的存储空间包括内存+硬盘，可以存比较大的State。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Keyed State</th>
+<th>Operator State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>使用算子类型</td>
+<td>只适用于KeyedStream上的算子</td>
+<td>可以用于所有算子</td>
+</tr>
+<tr>
+<td>状态分配</td>
+<td>每个Key对应一个状态</td>
+<td>一个Slot对应一个状态</td>
+</tr>
+<tr>
+<td>支持的数据量</td>
+<td>可以使用RocksDB作为State存储</td>
+<td>State不能超过机器内存</td>
+</tr>
+</tbody>
+</table>
+<h2 id="35-state存储地点">3.5 state存储地点</h2>
+<p>State存储在本地的内存和硬盘中，做Checkpoint时，Flink将本地的State持久化到HDFS、S3等远程存储处，元数据汇报给JobManager。
+生产环境中，大容量State需要使用RocksDB作为State的存储方式，下面简单介绍下RocksDB原理。
+RocksDB是基于Log Structured-Merge Tree（(LSM，日志结构合并树）的KV数据库，程序对数据库的增、删、改都会以日志的形式写入内存的MemTable。当MemTable写满时，将MemTable Flush到硬盘的SsTable，SsTable是不可变的。RocksDB后台定时对SsTable做Compaction以合并日志，减少文件量。Compaction之后的SsTable数据和原来数据是一致的。Flink追踪SsTable的文件地址，做Checkpoint时将SsTable发送到远程数据存储。</p>
+<h2 id="36-state存储过程">3.6 state存储过程</h2>
+<p>Flink算子做Checkpoint分为两个阶段：同步阶段和异步阶段。在同步阶段，算子停止计算，如果使用内存State，算子会深拷贝State，拿到深拷贝的指针；如果使用RocksDB State，算子会把MemTable Flush到硬盘，拿到硬盘文件的地址。在异步阶段，算子恢复计算，另起一个线程把State存到HDFS，文件地址发送给JobManager。
+Flink 1.5之前，使用RocksDB每次做Checkpoint都会持久化全量SsTable文件，网络开销非常大。Flink 1.5推出了异步增量Checkpoint功能，利用RocksDB的特性，每次Checkpoint只需要传输 本次Checkpoint和上次Checkpoint的增量。
+如下图，Flink缓存了SsTable到HDFS文件映射的指针 和 Checkpoint的共享注册数。在Checkpoint 1，新增两个SsTable，注册数量+1；在Checkpoint 2，新增两个SsTable，四个SsTable注册数量都+1；在Checkpoint 3，SsTable1、SsTable2、SsTable3被合并成SsTable（1，2，3），同时新增SsTable4和SsTable5，所以SsTable（1，2，3）、SsTable4、SsTable5注册数量+1，同时，由于Checkpoint 2已经做成功，所以Checkpoint 1可以被删除，因此，SsTable1、SsTable2注册数量-1；在Checkpoint 4，SsTable4和SsTable5被合并成SsTable（4，5，6），SsTable（1，2，3）和SsTable（4，5，6）的注册数量+1，由于CP2被删除，SsTable1、SsTable2、SsTable3、SsTable4注册数量都-1。
+每次做完Checkpoint，只需要传输本次Checkpoint新增的SsTable。当一个SsTable注册数量为0时，把它从HDFS上删除。</p>
+<h2 id="37-state恢复">3.7 state恢复</h2>
+<p>当Flink作业因为错误或发版重启时，JobManager加载最近一次成功的Checkpoint，分配Task的State。Task从远程持久化的地点获得State。Flink支持算子并发修改的State分配。
+Operator State 并发数量变化，开发者实现snapShotState方法和restoreState方法，即可重新分配State。下图中，Source算子消费了Kafka的3个Partition，扩容到两个并发后，不同的Partition分配给不同的并发。</p>
+<p>Keyed State并发数量变化，Flink会重新Hash一遍分配。下图中，原来有三个并发，所有的Key除以3取余得到Subtask编号。并发从3扩到4之后，所有的Key除以4取余得到Subtask编号。</p>
+<p>这种方法缺点是：每个Subtask很难分到原来的Key，Flink作业重启时会优先从原来的容器启动作业，可以直接使用本地的数据启动，不需要从State Backend拉数据。Flink 1.5的优化利用了这个特性，提出了Key-Group的概念。先将Key Hash到Key-Group里，每个Subtask分到若干
+Key-Group，扩缩容时以Key-Group为粒度分配。图中可以明显看到，新算法的本地保留的Key明显比老算法多。</p>
+<h1 id="4-端到端一致性">4 端到端一致性</h1>
+<h2 id="41-要求">4.1 要求</h2>
+<p>上面主要讨论的是Flink引擎的容错与一致性，端到端一致性对source、计算引擎、sink三者都有要求。对于source，要求是可以replay的；对于Sink，要求幂等或支持事务。下面是各种Source和Sink是否支持一致性，只有Source和SInk都支持一致性，才能保证端到端一致性。表中支持端到端一致性的存储是比较少的，只有Kafka和Files两者都支持。这也是Kafka是Flink首选搭配中间件的原因。</p>
+<h2 id="42-source">4.2 Source</h2>
+<p>Source必须支持Replay。以Kafka为例，Kakfa的每条消息都有offset，Source算子重启时从offset消费。</p>
+<h2 id="43-sink">4.3 Sink</h2>
+<p>Sink是幂等或者支持事务。幂等可以选择KV数据库，对于支持事务的Sink，Flink在做Checkpoint的过程中调用Sink的两阶段提交。开发者需要在Sink算子实现TwoPhaseCommitSinkFunction接口，该接口有四个方法：beginTransaction、preCommit、commit、abort。Flink开始做Checkpoint的时候，调用beginTransaction方法；做Checkpoint过程中，调用preCommit方法；完成Checkpoint时，调用commit方法；Checkpoint失败，调用abort方法。以Sink到文件系统举例，beginTransaction时，创建一个临时目录，preCommit时，把数据写到临时目录里，commit时，把临时目录移到正式目录，abort时，删除临时目录。</p>
+<h1 id="5-前沿技术">5 前沿技术</h1>
+<h2 id="51-unaligned-checkpoint">5.1 Unaligned Checkpoint</h2>
+<p>Flink现有的的轻量级Checkpoint算法，如果出现反压，Barrier会一直难以对齐，Barrier的上游会一直阻塞，促使反压更加严重。为了解决这个问题，Flink 1.11改进了原来的算法，提出了Unaligned Checkpoint，以增加Checkpoint容量为代价提高吞吐量，开发者可以根据作业实际情况按需选用。新算法不对齐Barrier，算子的Input Buffer收到第一个Barrier后，立刻在Output Buffer的最后插入一个Barrier。将此刻的State和Output Buffer的数据做深拷贝，视作此次Checkpoint的一部分；同时，记录所有Input的数据，直至处理到所有的Input的Barrier。
+以下图为例，Input也分为数字流和字母流，算子在数字流中监听到Barrier进入Input Buffer，立刻往Output Buffer的最后插入Barrier，图中的绿色部分都会存到Checkpoint中。
+Unaligned Checkpoint最大化提升了Barrier的流转速度，不再阻塞Input，代价是增加Checkpoint容量。</p>
+<h2 id="52-chi">5.2 Chi</h2>
+<p>Chi是与2017年微软提出的算法，主要思想是：在普通Message中插入Control API消息，算子根据接收到的API消息，动态扩缩容并发数。Flink在实际生产中，算子的并发数配置依赖开发者的经验，要么并发数设小了有反压，要么并发数设大了浪费机器性能。而且调整并发数只能重启作业，时间成本很大。Chi算法中，Controller监控算子的CPU、内存，达到阈值后就开始扩容。扩容不需要重启作业，只需要算子原来的并发机器把一部分State发送到新并发机器上，实现了秒级的弹性扩缩容。
+下图中，（I）Controller决定扩容，向M1、M2发送新拓扑图；（II）M1、M2 更新routing table，广播给R1、R2和新增的R3；（III）R1、R2收到某个M的Control扩容命令后，阻塞该M的输入，继续处理其他M；（IV）当收到所有M的Control命令后，按照Hash规则，将State分出一部分发给R3；（V）R3收到M的Control命令后，先把M阻塞；等收到R1、R2的State后，重组成本地State，开始工作；（VI）扩容完成。</p>
+<h1 id="参考资料">参考资料</h1>
+<ul>
+<li>论文
+- Distributed Snapshots: Determining Global States of Distributed Systems
+- Lightweight Asynchronous Snapshots for Distributed Dataflows
+- State Management in Apache Flink
+- Chi: A Scalable and Programmable Control Plane for Distributed Stream Processing Systems</li>
+<li>博客
+- <a href="https://flink.apache.org/features/2018/01/30/incremental-checkpointing.html">https://flink.apache.org/features/2018/01/30/incremental-checkpointing.html</a>
+- <a href="https://flink.apache.org/features/2017/07/04/flink-rescalable-state.html">https://flink.apache.org/features/2017/07/04/flink-rescalable-state.html</a>
+- <a href="https://ci.apache.org/projects/flink/flink-docs-release-1.11/dev/connectors/guarantees.html">https://ci.apache.org/projects/flink/flink-docs-release-1.11/dev/connectors/guarantees.html</a>
+- <a href="https://ci.apache.org/projects/flink/flink-docs-release-1.11/concepts/stateful-stream-processing.html">https://ci.apache.org/projects/flink/flink-docs-release-1.11/concepts/stateful-stream-processing.html</a>
+- <a href="https://flink.apache.org/features/2018/03/01/end-to-end-exactly-once-apache-flink.html">https://flink.apache.org/features/2018/03/01/end-to-end-exactly-once-apache-flink.html</a>
+- <a href="https://blog.jrwang.me/2019/flink-source-code-checkpoint">https://blog.jrwang.me/2019/flink-source-code-checkpoint</a>
+- <a href="https://zhuanlan.zhihu.com/p/77677075">https://zhuanlan.zhihu.com/p/77677075</a></li>
+</ul>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">olOwOlo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2023-01-30
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      
+      <nav class="post-nav">
+        
+        
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+  <a href="http://localhost:1313/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2023<span class="heart"><i class="iconfont icon-heart"></i></span><span>olOwOlo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
